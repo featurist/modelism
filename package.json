@@ -7,8 +7,11 @@
     "test": "mocha",
     "coverage": "mocha --require blanket -R html-cov > coverage.html"
   },
-  "author": "Josh Chisholm",
-  "license": "BSD",
+  "keywords": [
+    "model",
+    "schema",
+    "validation"
+  ],
   "dependencies": {
   },
   "devDependencies": {
@@ -21,5 +24,18 @@
       "pattern": [ "" ],
       "data-cover-never": [ "node_modules", "tests" ]
     }
-  }
+  },
+  "author": "Josh Chisholm <joshuachisholm@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "*.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/featurist/modelism.git"
+  },
+  "bugs": {
+    "url": "https://github.com/featurist/modelism/issues"
+  },
+  "homepage": "https://github.com/featurist/modelism"
 }

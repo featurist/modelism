@@ -72,4 +72,4 @@ new Cake({ taste: 'savoury' }).isValid() // -> false;
 
 ## License
 
-BSD
+MIT
