@@ -1,0 +1,25 @@
+{
+  "name": "modelism",
+  "version": "1.0.0",
+  "description": "A DSL for defining self-validating models",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "coverage": "mocha --require blanket -R html-cov > coverage.html"
+  },
+  "author": "Josh Chisholm",
+  "license": "BSD",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3"
+  },
+  "config": {
+    "blanket": {
+      "pattern": [ "" ],
+      "data-cover-never": [ "node_modules", "tests" ]
+    }
+  }
+}
