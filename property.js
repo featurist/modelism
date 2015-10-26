@@ -1,4 +1,5 @@
 var validators = require('./validators');
+var inflection = require('./inflection');
 
 function Property(name, definition) {
   this.name = name;
@@ -6,6 +7,9 @@ function Property(name, definition) {
   this.validators = [];
   for (var key in definition) {
     buildProperty(this, key, definition[key]);
+  }
+  if (typeof(this.label) != 'string') {
+    this.label = inflection.titleFromCamelCase(name);
   }
 }
 

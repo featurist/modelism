@@ -19,7 +19,7 @@ describe('model(schema)', function() {
             message: 'must contain alphabetic characters and start with capital'
           }
         },
-        lastName: { type: 'string', presence: true },
+        lastName: { type: 'string', presence: true, label: 'Surname' },
         email: { type: 'email', presence: true },
         company: { schema: 'Company' },
         photos: { schema: ['Image'] },
@@ -63,6 +63,14 @@ describe('model(schema)', function() {
 
     it('exposes model properties', function() {
       expect(ned.schema.properties[0].name).to.eql('firstName');
+    });
+
+    it('generates a label when unspecified', function() {
+      expect(ned.schema.properties[0].label).to.eql('First Name');
+    });
+
+    it('uses the label when specified', function() {
+      expect(ned.schema.properties[1].label).to.eql('Surname');
     });
 
   });

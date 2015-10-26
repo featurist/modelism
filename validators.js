@@ -26,6 +26,9 @@ var validators = {
     if (typeValidator) {
       typeValidator(property, true);
     }
+  },
+  label: function(property, value) {
+    property.label = value;
   }
 }
 

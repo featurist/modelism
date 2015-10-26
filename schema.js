@@ -18,7 +18,7 @@ Schema.prototype.validate = function(model) {
 Schema.prototype.defineProperties = function(properties) {
   this.properties = [];
   for (var name in properties) {
-    this.properties.push(new Property(name, properties[name]))
+    this.properties.push(new Property(name, properties[name]));
   }
 };
 
