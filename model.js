@@ -22,4 +22,19 @@ Model.prototype.toString = function() {
   return '#<' + this.schema.name + '>';
 };
 
+Model.prototype.serialize = function() {
+  var obj = {};
+  for (var i = 0; i < this.schema.properties.length; ++i) {
+    var name = this.schema.properties[i].name;
+    if (typeof(this[name]) != 'undefined') {
+      if (typeof(this[name].serialize) == 'function') {
+        obj[name] = this[name].serialize();
+      } else {
+        obj[name] = this[name];
+      }
+    }
+  }
+  return obj;
+}
+
 module.exports = Model;

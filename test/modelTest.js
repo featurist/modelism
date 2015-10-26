@@ -222,6 +222,21 @@ describe('model(schema)', function() {
 
   });
 
+  describe('.serialize()', function() {
+
+    it('produces a json-friendly object with property values', function() {
+      expect(ned.serialize()).to.eql({
+        firstName: 'Ned',
+        lastName: 'Flanders',
+        company: {
+          name: 'The Leftorium'
+        },
+        email: 'ned@leftorium.com'
+      });
+    });
+
+  });
+
 });
 
 describe('model(schema)', function() {
