@@ -12,17 +12,18 @@ describe('model(schema)', function() {
       name: 'Contact',
       properties: {
         firstName: {
+          type: 'string',
           presence: true,
           format: {
             pattern: '^[A-Z][A-Za-z\s]+$',
-            message: 'must only contain alphabetic characters'
+            message: 'must contain alphabetic characters and start with capital'
           }
         },
-        lastName: { presence: true },
-        email: { presence: true, email: true },
+        lastName: { type: 'string', presence: true },
+        email: { type: 'email', presence: true },
         company: { schema: 'Company' },
         photos: { schema: ['Image'] },
-        age: { integer: true }
+        age: { type: 'integer' }
       }
     });
 
@@ -39,7 +40,8 @@ describe('model(schema)', function() {
     Image = model({
       name: 'Image',
       properties:{
-        url: {}
+        url: {},
+        data: { type: 'file' }
       }
     });
 
@@ -169,6 +171,14 @@ describe('model(schema)', function() {
           property: "contacts.1.email",
           message: "is not a valid email address"
         }]);
+      });
+
+    });
+
+    describe("with { type: 'string' }", function() {
+
+      it('sets the property type to string', function() {
+        expect(new Contact({}).schema.properties[0].type).to.eql('string');
       });
 
     });

@@ -19,6 +19,13 @@ var validators = {
     }
     property.schema = value;
     property.addValidator(new RelationValidator(property.name, value));
+  },
+  type: function(property, value) {
+    property.type = value;
+    var typeValidator = validators[value];
+    if (typeValidator) {
+      typeValidator(property, true);
+    }
   }
 }
 

@@ -14,7 +14,7 @@ var Contact = model({
       presence: true,
       format: {
         pattern: '^[A-Z][A-Za-z\s]+$',
-        message: 'must only contain alphabetic characters'
+        message: 'must contain alphabetic characters and start with a capital'
       }
     },
     lastName: { presence: true },
