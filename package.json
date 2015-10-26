@@ -1,6 +1,6 @@
 {
   "name": "modelism",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A DSL for defining self-validating models",
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,7 @@
     "schema",
     "validation"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "blanket": "^1.1.7",
     "chai": "^3.3.0",
@@ -21,8 +20,13 @@
   },
   "config": {
     "blanket": {
-      "pattern": [ "" ],
-      "data-cover-never": [ "node_modules", "tests" ]
+      "pattern": [
+        ""
+      ],
+      "data-cover-never": [
+        "node_modules",
+        "tests"
+      ]
     }
   },
   "author": "Josh Chisholm <joshuachisholm@gmail.com>",
