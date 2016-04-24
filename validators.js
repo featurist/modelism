@@ -105,22 +105,19 @@ RelationValidator.prototype.validate = function(value) {
 }
 
 RelationValidator.prototype.validateCollection = function(value) {
-  if (value.constructor == Array) {
-    var errors = [];
-    for (var i = 0; i < value.length; ++i) {
-      var indexErrors = this.validateCollectionAtIndex(value, i);
-      for (var j = 0; j < indexErrors.length; ++j) {
-        if (typeof(indexErrors[j].property) == 'undefined') {
-          indexErrors[j].property = i.toString();
-        } else {
-          indexErrors[j].property = i + '.' + indexErrors[j].property;
-        }
+  var errors = [];
+  for (var i = 0; i < value.length; ++i) {
+    var indexErrors = this.validateCollectionAtIndex(value, i);
+    for (var j = 0; j < indexErrors.length; ++j) {
+      if (typeof(indexErrors[j].property) == 'undefined') {
+        indexErrors[j].property = i.toString();
+      } else {
+        indexErrors[j].property = i + '.' + indexErrors[j].property;
       }
-      errors = errors.concat(indexErrors);
     }
-    return errors;
+    errors = errors.concat(indexErrors);
   }
-  return [{ message: 'is not a valid ' + this.schemaName + ' collection' }];
+  return errors;
 }
 
 RelationValidator.prototype.validateCollectionAtIndex = function(value, index) {
