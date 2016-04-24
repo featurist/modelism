@@ -6,70 +6,37 @@ A DSL for defining self-validating JavaScript models.
 
 ### Defining models
 
-Define models with compact schema definitions:
+Use compact schema definitions to define validation rules:
 
 ```JavaScript
 var model = require('modelism');
 
-var Contact = model({
-  name: 'Contact',
-  properties: {
-    firstName: {
-      presence: true,
-      format: {
-        pattern: '^[A-Z][A-Za-z\s]+$',
-        message: 'only alphabetic characters, start with a capital'
-      }
-    },
-    lastName: { presence: true },
-    email: { presence: true, email: true, label: 'Email Address' },
-    company: { schema: 'Company' },
-    age: { integer: true }
-  }
-});
-
 var Company = model({
   name: 'Company',
   properties: {
-    name: { presence: true },
-    logo: { schema: 'Image' },
-    yearIncorporated: { integer: true },
-    contacts: { schema: ['Contact'] }
+    name: {
+      presence: true,
+      format: {
+        pattern: '^[A-Za-z0-9\s]+$',
+        message: 'Alphanumeric characters'
+      }
+    },
+    email: {
+      email: true
+    }
   }
 });
 ```
 
 ### Creating models
 
-Now you can instantiate the schemas from data objects:
+Simple models can be instantiated with property values:
 
 ```JavaScript
 var leftorium = new Company({
-  name: 'The Leftorium'
+  name: 'The Leftorium',
+  email: 'ned@leftorium.com'
 });
-
-var ned = new Contact({
-  firstName: 'Ned',
-  lastName: 'Flanders',
-  email: 'ned@leftorium.com',
-  company: leftorium
-});
-```
-
-### Creating models from data
-
-Hydrate related entities with independent schemas from nested data structures:
-
-```JavaScript
-var data = {
-  firstName: 'Homer',
-  company: {
-    name: 'Nuclear power plant'
-  }
-}
-var model = model(Company, Contact);
-var contact = model.create('Contact', data);
-contact.company.isValid() // -> true
 ```
 
 ### Validating models
@@ -78,22 +45,52 @@ Models have schemas, so they can validate themselves and group the resulting
 validation errors by property:
 
 ```JavaScript
-ned.schema                        // -> { name: 'Contact', properties: [...] }
+leftorium.schema                        // -> { name: 'Company', properties: [...] }
 
-ned.isValid()                     // -> true
-ned.firstName = '';
-ned.isValid()                     // -> false
+leftorium.isValid()                     // -> true
+leftorium.name = '';
+leftorium.isValid()                     // -> false
 
-var validation = ned.validate();  // -> { errors: [...] }
-validation.errors;                // -> [{ property: ..., message: ... }, ...]
-validation.property('firstName')  // -> ['is required']
+var validation = leftorium.validate();  // -> { errors: [...] }
+leftorium.errors;                       // -> [{ property: ..., message: ... }, ...]
+leftorium.errorsOn('name')              // -> ['is required']
 ```
 
-Validation includes related models:
+### Relationships between models
+
+Schema properties can refer to other schemas by name. Use a factory to create
+objects with different schemas and relationships between them:
 
 ```JavaScript
-leftorium.name = '';
-ned.validate().property('company.name')   // -> ['is required']
+
+var Contact = model({
+  name: 'Contact',
+  properties: {
+    firstName: { type: 'string'},
+    company: { schema: 'Company' }
+  }
+});
+
+var data = {
+  firstName: 'Homer',
+  company: {
+    name: 'Nuclear power plant'
+  }
+}
+var factory = model.factory(Company, Contact);
+var contact = factory.create('Contact', data);
+contact.company.validate() // -> { errors: [...] }
+```
+
+### Validating related models
+
+Validating a model will validate any related models:
+
+```JavaScript
+var ned = factory.create('Contact', {
+  company: { name: '' }
+})
+ned.validate().errorsOn('company.name') // -> ['is required']
 ```
 
 ## Property schema language
@@ -112,8 +109,8 @@ var Television = model({
 });
 ```
 
-Just like `presence`, you can register your own domain-specific validators as
-keywords this language:
+Just like `presence`, you can register your own domain-specific validators and
+extend the property validator language:
 
 ``` JavaScript
 model.validators.onlySweet = function(property, enabled) {

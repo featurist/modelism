@@ -267,21 +267,21 @@ describe('model(schema)', function() {
       ]);
     });
 
-    describe('.property("firstName")', function() {
+    describe('.errorsOn("firstName")', function() {
 
       it('lists error messages for the firstName property', function() {
         var anon = new Contact();
-        var errors = anon.validate().property('firstName');
+        var errors = anon.validate().errorsOn('firstName');
         expect(errors).to.eql(['is required']);
       });
 
     });
 
-    describe('.property("company.name")', function() {
+    describe('.errorsOn("company.name")', function() {
 
       it("lists error messages for the related company name property", function() {
         leftorium.name = null;
-        var errors = ned.validate().property('company.name');
+        var errors = ned.validate().errorsOn('company.name');
         expect(errors).to.eql(['is required']);
       });
 
@@ -421,7 +421,7 @@ describe('model(schema).create(data)', function() {
   });
 });
 
-describe('model(modelClass, modelClass, ...).create(schemaName, data)', function() {
+describe('model.factory(modelClass, modelClass, ...).create(schemaName, data)', function() {
   it('creates instances of the schema and related schemas', function() {
     var Company = model({
       name: 'Company',
@@ -441,9 +441,11 @@ describe('model(modelClass, modelClass, ...).create(schemaName, data)', function
         name: 'Nuclear power plant'
       }
     }
-    var homer = model(Company, Contact).create('Contact', data);
+    var homer = model.factory(Company, Contact).create('Contact', data);
+    expect(homer.isValid()).to.be.true;
     expect(homer.company.isValid()).to.be.true;
     homer.company.name = '';
+    expect(homer.isValid()).to.be.false;
     expect(homer.company.isValid()).to.be.false;
   });
 });

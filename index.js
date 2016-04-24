@@ -1,6 +1,27 @@
 var Model = require('./model');
 var Schema = require('./schema');
 
+function defineModel(definition) {
+  var schema = new Schema(definition, Model.reservedProperties);
+
+  function model(propertyValues) {
+    this.schema = schema;
+    for (var key in propertyValues) {
+      this[key] = propertyValues[key];
+    }
+  }
+  model.prototype = new Model();
+  model.create = function(data) { return new model(data); }
+  model.schema = schema;
+  return model;
+}
+
+defineModel.validators = require('./validators');
+defineModel.reservedProperties = Model.reservedProperties;
+defineModel.factory = function() {
+  return new Factory([].slice.apply(arguments));
+}
+
 function Factory(models) {
   this.models = {};
   for (var i = 0; i < models.length; ++i) {
@@ -19,26 +40,5 @@ Factory.prototype.create = function(schemaName, properties) {
   }
   return model;
 }
-
-function defineModel(definition) {
-  if (typeof(definition) == 'function') {
-    return new Factory([].slice.apply(arguments));
-  }
-  var schema = new Schema(definition, Model.reservedProperties);
-
-  function model(propertyValues) {
-    this.schema = schema;
-    for (var key in propertyValues) {
-      this[key] = propertyValues[key];
-    }
-  }
-  model.prototype = new Model();
-  model.create = function(data) { return new model(data); }
-  model.schema = schema;
-  return model;
-}
-
-defineModel.validators = require('./validators');
-defineModel.reservedProperties = Model.reservedProperties;
 
 module.exports = defineModel;

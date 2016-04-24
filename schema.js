@@ -42,7 +42,7 @@ ValidationResult.prototype.isValid = function() {
   return this.errors.length == 0;
 }
 
-ValidationResult.prototype.property = function(path) {
+ValidationResult.prototype.errorsOn = function(path) {
   var propertyErrors = [];
   for (var i = 0; i < this.errors.length; ++i) {
     if (this.errors[i].property == path) {
