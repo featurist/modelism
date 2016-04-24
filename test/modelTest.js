@@ -420,3 +420,30 @@ describe('model(schema).create(data)', function() {
     expect(house.isValid()).to.be.true;
   });
 });
+
+describe('model(modelClass, modelClass, ...).create(schemaName, data)', function() {
+  it('creates instances of the schema and related schemas', function() {
+    var Company = model({
+      name: 'Company',
+      properties: {
+        name: { type: 'string', presence: true }
+      }
+    });
+    var Contact = model({
+      name: 'Contact',
+      properties: {
+        company: { schema: 'Company' }
+      }
+    });
+    var data = {
+      firstName: 'Homer',
+      company: {
+        name: 'Nuclear power plant'
+      }
+    }
+    var homer = model(Company, Contact).create('Contact', data);
+    expect(homer.company.isValid()).to.be.true;
+    homer.company.name = '';
+    expect(homer.company.isValid()).to.be.false;
+  });
+});

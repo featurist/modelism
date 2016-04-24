@@ -56,6 +56,22 @@ var ned = new Contact({
 });
 ```
 
+### Creating models from data
+
+Hydrate related entities with independent schemas from nested data structures:
+
+```JavaScript
+var data = {
+  firstName: 'Homer',
+  company: {
+    name: 'Nuclear power plant'
+  }
+}
+var model = model(Company, Contact);
+var contact = model.create('Contact', data);
+contact.company.isValid() // -> true
+```
+
 ### Validating models
 
 Models have schemas, so they can validate themselves and group the resulting
