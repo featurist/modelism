@@ -1,5 +1,4 @@
 var model = require('../');
-var Model = require('../model');
 var expect = require('chai').expect;
 
 describe('model(schema)', function() {

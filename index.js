@@ -6,7 +6,9 @@ function defineModel(definition) {
 
   function model(propertyValues) {
     this.schema = schema;
-    this.updateProperties(propertyValues);
+    for (var key in propertyValues) {
+      this[key] = propertyValues[key];
+    }
   }
   model.prototype = new Model();
   model.create = function(data) { return new model(data); }
