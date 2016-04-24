@@ -9,7 +9,7 @@ function defineModel(definition) {
     this.updateProperties(propertyValues);
   }
   model.prototype = new Model();
-
+  model.create = function(data) { return new model(data); }
   return model;
 }
 

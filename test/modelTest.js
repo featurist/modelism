@@ -75,9 +75,17 @@ describe('model(schema)', function() {
 
   });
 
-  describe('.isValid() for properties:', function() {
+  describe('.isValid()', function() {
 
-    describe('with no validation errors', function() {
+    context('when the model has simple properties with no validation errors', function() {
+
+      it('is true', function() {
+        expect(leftorium.isValid()).to.be.true;
+      });
+
+    });
+
+    context('when the model has composite properties with no validation errors', function() {
 
       it('is true', function() {
         expect(ned.isValid()).to.be.true;
@@ -97,6 +105,15 @@ describe('model(schema)', function() {
         expect(ned.isValid()).to.be.false;
       });
 
+      it('is false when the property is undefined', function() {
+        delete(ned.firstName);
+        expect(ned.isValid()).to.be.false;
+      });
+
+      it('is false when the property is undefined', function() {
+        ned.firstName = undefined;
+        expect(ned.isValid()).to.be.false;
+      });
     });
 
     describe('with { integer: true }', function() {
@@ -170,12 +187,12 @@ describe('model(schema)', function() {
       });
 
       it('is true when the value is a collection of valid values', function() {
-        expect(barney.validate()).to.eql([]);
-        expect(moe.validate()).to.eql([]);
+        expect(barney.validate().errors).to.eql([]);
+        expect(moe.validate().errors).to.eql([]);
         leftorium.contacts = [barney, moe];
         expect(leftorium.isValid()).to.be.true;
         moe.email = '123 Fake Street';
-        expect(leftorium.validate()).to.eql([{
+        expect(leftorium.validate().errors).to.eql([{
           property: "contacts.1.email",
           message: "is not a valid email address"
         }]);
@@ -202,13 +219,33 @@ describe('model(schema)', function() {
       ned.company.name = '';
       ned.company.logo = new Contact({});
       ned.company.contacts = [krusty];
-      expect(ned.validate()).to.eql([
+      expect(ned.validate().errors).to.eql([
         { property: 'firstName', message: 'is required' },
         { property: 'email', message: 'is not a valid email address' },
         { property: 'company.name', message: 'is required' },
         { property: 'company.logo', message: 'is not a valid Image' },
         { property: 'company.contacts.0.email', message: 'is required' }
       ]);
+    });
+
+    describe('.property("firstName")', function() {
+
+      it('lists error messages for the firstName property', function() {
+        var anon = new Contact();
+        var errors = anon.validate().property('firstName');
+        expect(errors).to.eql(['is required']);
+      });
+
+    });
+
+    describe('.property("company.name")', function() {
+
+      it("lists error messages for the related company name property", function() {
+        leftorium.name = null;
+        var errors = ned.validate().property('company.name');
+        expect(errors).to.eql(['is required']);
+      });
+
     });
 
   });
@@ -269,6 +306,13 @@ describe('model(schema)', function() {
     );
   });
 
+  it('rejects empty schema array values', function() {
+    expectInvalidModel(
+      { name: 'Boom', properties: { foo: { schema: [] } } },
+      "foo.schema is invalid"
+    );
+  });
+
   it('rejects schema array values with > 1 element', function() {
     expectInvalidModel(
       { name: 'Boom', properties: { foo: { schema: ['a', 'b'] } } },
@@ -283,6 +327,13 @@ describe('model(schema)', function() {
     );
   });
 
+  it('rejects schema array values with invalid elements', function() {
+    expectInvalidModel(
+      { name: 'Boom', properties: { foo: { schema: [''] } } },
+      "foo.schema is invalid"
+    );
+  });
+
   it("rejects a model property named 'schema'", function() {
     expectInvalidModel(
       { name: 'Boom', properties: { schema: {} } },
@@ -291,16 +342,38 @@ describe('model(schema)', function() {
   });
 
   it("exposes the validators object to extend the schema DSL", function() {
-    model.validators.sweet = function(property) {
-      property.addValidator({
-        validate: function(value) {
-          return value == 'sweet' ? [] : [{ message: 'must be sweet' }];
-        }
-      });
+    model.validators.onlySweet = function(property, enabled) {
+      if (enabled) {
+        property.addValidator({
+          validate: function(taste) {
+            return taste == 'sweet' ? [] : [{ message: 'must be sweet' }];
+          }
+        });
+      }
     }
-    var Cake = model({ name: 'Cake', properties: { taste: { sweet: true } } });
-    expect(new Cake({ taste: 'sweet' }).isValid()).to.be.true;
-    expect(new Cake({ taste: 'savoury' }).isValid()).to.be.false;
+    var Cake = model({
+      name: 'Cake',
+      properties: {
+        taste: { onlySweet: true },
+        aftertaste: { onlySweet: false }
+      }
+    });
+    expect(new Cake({ taste: 'sweet', aftertaste: 'sweet' }).isValid()).to.be.true;
+    expect(new Cake({ taste: 'savory', aftertaste: 'sweet' }).isValid()).to.be.false;
+    expect(new Cake({ taste: 'sweet', aftertaste: 'savory' }).isValid()).to.be.true;
   });
 
+});
+
+describe('model(schema).create(data)', function() {
+  it('creates instances of the schema without using the new keyword', function() {
+    var schema = {
+      name: 'House',
+      properties: {
+        number: {}
+      }
+    }
+    var house = model(schema).create({ number: 10 });
+    expect(house.isValid()).to.be.true;
+  });
 });

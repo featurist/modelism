@@ -12,13 +12,13 @@ var validators = {
     property.addValidator(new IntegerValidator(value));
   },
   schema: function(property, value) {
-    if (value == null ||
-        (typeof(value) == 'string' && value.length == 0) ||
-        (value.constructor == Array && value.length != 1)) {
+    try {
+      property.addValidator(new RelationValidator(property.name, value));
+      property.schema = value;
+    }
+    catch (e) {
       throw new Error(property.name + '.schema is invalid');
     }
-    property.schema = value;
-    property.addValidator(new RelationValidator(property.name, value));
   },
   type: function(property, value) {
     property.type = value;
@@ -76,14 +76,18 @@ IntegerValidator.prototype.validate = function(value) {
 
 function RelationValidator(propertyName, schemaSpec) {
   this.propertyName = propertyName;
-  if (typeof(schemaSpec) == 'string') {
+  if (isValidSchemaName(schemaSpec)) {
     this.schemaName = schemaSpec;
-  } else if (schemaSpec.length == 1) {
+  } else if (schemaSpec.length == 1 && isValidSchemaName(schemaSpec[0])) {
     this.schemaName = schemaSpec[0];
     this.isCollection = true;
   } else {
     throw new Error('Invalid schema spec ' + JSON.stringify(schemaSpec));
   }
+}
+
+function isValidSchemaName(name) {
+  return typeof(name) == 'string' && !/^\s*$/.test(name);
 }
 
 RelationValidator.prototype.validate = function(value) {
@@ -93,7 +97,7 @@ RelationValidator.prototype.validate = function(value) {
     }
     if (value.schema && value.schema.name == this.schemaName &&
         typeof(value.validate) == 'function') {
-      return value.validate(value[this.propertyName]);
+      return value.validate(value[this.propertyName]).errors;
     }
     return [{ message: 'is not a valid ' + this.schemaName }];
   }

@@ -1,7 +1,7 @@
 function Model() {}
 
 Model.prototype.isValid = function() {
-  return this.validate().length == 0;
+  return this.validate().isValid();
 };
 
 Model.prototype.validate = function() {
