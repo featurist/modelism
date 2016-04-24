@@ -31,7 +31,13 @@ describe('model(schema)', function() {
     Company = model({
       name: 'Company',
       properties: {
-        name: { presence: true },
+        name: {
+          presence: true,
+          format: {
+            pattern: /orium$/,
+            message: 'must be an orium!'
+          }
+        },
         logo: { schema: 'Image' },
         yearIncorporated: { integer: true },
         contacts: { schema: ['Contact'] }
@@ -151,6 +157,20 @@ describe('model(schema)', function() {
       it('is false when the formatted value does not match', function() {
         ned.firstName = 'A';
         expect(ned.isValid()).to.be.false;
+      });
+
+    });
+
+    describe("with { format: { pattern: /xyz/ } }", function() {
+
+      it('is false when the formatted value does not match', function() {
+        leftorium.name = 'oh yeah';
+        expect(ned.isValid()).to.be.false;
+      });
+
+      it('is true when the formatted value does match', function() {
+        leftorium.name = 'Boriumorium';
+        expect(ned.isValid()).to.be.true;
       });
 
     });
@@ -279,10 +299,10 @@ describe('model(schema)', function() {
 
   });
 
-  describe('.serialize()', function() {
+  describe('.toJSON()', function() {
 
     it('produces a json-friendly object with property values', function() {
-      expect(ned.serialize()).to.eql({
+      expect(ned.toJSON()).to.eql({
         firstName: 'Ned',
         lastName: 'Flanders',
         company: {
