@@ -3,7 +3,6 @@ var inflection = require('./inflection');
 
 function Property(name, definition) {
   this.name = name;
-  this.verifyNameIsAllowed();
   this.validators = [];
   for (var key in definition) {
     buildProperty(this, key, definition[key]);
@@ -35,12 +34,6 @@ Property.prototype.applyValidator = function(validator, value) {
   }
   return errors;
 };
-
-Property.prototype.verifyNameIsAllowed = function() {
-  if (this.name == 'schema') {
-    throw new Error("Properties named 'schema' are not allowed")
-  }
-}
 
 function buildProperty(property, key, value) {
   var validator = validators[key];

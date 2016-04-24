@@ -37,4 +37,6 @@ Model.prototype.serialize = function() {
   return obj;
 }
 
+Model.reservedProperties = Object.keys(Model.prototype);
+
 module.exports = Model;

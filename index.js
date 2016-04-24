@@ -2,7 +2,7 @@ var Model = require('./model');
 var Schema = require('./schema');
 
 function defineModel(definition) {
-  var schema = new Schema(definition);
+  var schema = new Schema(definition, Model.reservedProperties);
 
   function model(propertyValues) {
     this.schema = schema;
@@ -14,5 +14,6 @@ function defineModel(definition) {
 }
 
 defineModel.validators = require('./validators');
+defineModel.reservedProperties = Model.reservedProperties;
 
-module.exports = defineModel
+module.exports = defineModel;

@@ -1,7 +1,8 @@
 var Property = require('./property');
 
-function Schema(definition) {
+function Schema(definition, reservedProperties) {
   this.name = definition.name;
+  this.assertNoPropertiesAreReserved(definition.properties, reservedProperties);
   this.defineProperties(definition.properties);
 }
 
@@ -21,6 +22,14 @@ Schema.prototype.defineProperties = function(properties) {
     this.properties.push(new Property(name, properties[name]));
   }
 };
+
+Schema.prototype.assertNoPropertiesAreReserved = function(properties, reservedProperties) {
+  for (var name in properties) {
+    if (reservedProperties.indexOf(name) > -1) {
+      throw new Error("Properties named '" + name + "' are not allowed");
+    }
+  }
+}
 
 function ValidationResult(errors) {
   this.errors = [];

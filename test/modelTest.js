@@ -1,4 +1,5 @@
 var model = require('../');
+var Model = require('../model');
 var expect = require('chai').expect;
 
 describe('model(schema)', function() {
@@ -353,11 +354,15 @@ describe('model(schema)', function() {
     );
   });
 
-  it("rejects a model property named 'schema'", function() {
-    expectInvalidModel(
-      { name: 'Boom', properties: { schema: {} } },
-      "Properties named 'schema' are not allowed"
-    );
+  model.reservedProperties.forEach(function(name) {
+    it("rejects a schema property named '" + name + "'", function() {
+      var props = {};
+      props[name] = {};
+      expectInvalidModel(
+        { name: 'Boom', properties: props },
+        "Properties named '" + name + "' are not allowed"
+      );
+    });
   });
 
   it("exposes the validators object to extend the schema DSL", function() {
