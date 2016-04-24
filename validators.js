@@ -110,7 +110,11 @@ RelationValidator.prototype.validateCollection = function(value) {
     for (var i = 0; i < value.length; ++i) {
       var indexErrors = this.validateCollectionAtIndex(value, i);
       for (var j = 0; j < indexErrors.length; ++j) {
-        indexErrors[j].property = i + '.' + indexErrors[j].property;
+        if (typeof(indexErrors[j].property) == 'undefined') {
+          indexErrors[j].property = i.toString();
+        } else {
+          indexErrors[j].property = i + '.' + indexErrors[j].property;
+        }
       }
       errors = errors.concat(indexErrors);
     }
@@ -120,6 +124,11 @@ RelationValidator.prototype.validateCollection = function(value) {
 }
 
 RelationValidator.prototype.validateCollectionAtIndex = function(value, index) {
+  if (value[index] == null) {
+    return [{ message: 'is not a ' + this.schemaName }]
+  } else if (typeof(value[index].schema) == 'object' && value[index].schema.name != this.schemaName) {
+    return [{ message: 'is a ' + value[index].schema.name + ', not a ' + this.schemaName }]
+  }
   return new RelationValidator(this.propertyName,
                                this.schemaName).validate(value[index]);
 }

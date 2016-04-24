@@ -110,7 +110,7 @@ describe('model(schema)', function() {
         expect(ned.isValid()).to.be.false;
       });
 
-      it('is false when the property is undefined', function() {
+      it('is false when the property value is undefined', function() {
         ned.firstName = undefined;
         expect(ned.isValid()).to.be.false;
       });
@@ -186,16 +186,35 @@ describe('model(schema)', function() {
         });
       });
 
-      it('is true when the value is a collection of valid values', function() {
-        expect(barney.validate().errors).to.eql([]);
-        expect(moe.validate().errors).to.eql([]);
-        leftorium.contacts = [barney, moe];
-        expect(leftorium.isValid()).to.be.true;
-        moe.email = '123 Fake Street';
-        expect(leftorium.validate().errors).to.eql([{
-          property: "contacts.1.email",
-          message: "is not a valid email address"
-        }]);
+      context('when the value is an array of valid values', function() {
+
+        it('is valid', function() {
+          expect(barney.validate().errors).to.eql([]);
+          expect(moe.validate().errors).to.eql([]);
+          leftorium.contacts = [barney, moe];
+          expect(leftorium.isValid()).to.be.true;
+          moe.email = '123 Fake Street';
+          expect(leftorium.validate().errors).to.eql([{
+            property: "contacts.1.email",
+            message: "is not a valid email address"
+          }]);
+        });
+
+      });
+
+      context('when the value includes objects that do not have the schema', function() {
+
+        it('is invalid', function() {
+          leftorium.contacts = [null, new Company()];
+          expect(leftorium.validate().errors).to.eql([{
+            property: "contacts.0",
+            message: "is not a Contact"
+          }, {
+            property: "contacts.1",
+            message: "is a Company, not a Contact"
+          }]);
+        });
+
       });
 
     });
