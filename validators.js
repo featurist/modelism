@@ -1,42 +1,45 @@
 var validators = {
-  presence: function(property, value) {
-    property.addValidator(new PresenceValidator(value));
+  presence: function(property, spec) {
+    property.presenceValidator = new PresenceValidator(spec, property);
   },
-  format: function(property, value) {
-    property.addValidator(new FormatValidator(value));
+  format: function(property, spec) {
+    property.addValidator(new FormatValidator(spec));
   },
-  email: function(property, value) {
-    property.addValidator(new EmailValidator(value));
+  email: function(property, spec) {
+    property.addValidator(new EmailValidator(spec));
   },
-  integer: function(property, value) {
-    property.addValidator(new IntegerValidator(value));
+  integer: function(property, spec) {
+    property.addValidator(new IntegerValidator(spec));
   },
-  schema: function(property, value) {
+  schema: function(property, spec) {
     try {
-      property.addValidator(new RelationValidator(property.name, value));
-      property.schema = value;
+      property.addValidator(new RelationValidator(property.name, spec));
+      property.schema = spec;
     }
     catch (e) {
       throw new Error(property.name + '.schema is invalid');
     }
   },
-  type: function(property, value) {
-    property.type = value;
-    var typeValidator = validators[value];
-    if (typeValidator) {
-      typeValidator(property, true);
-    }
+  type: function(property, spec) {
+    property.type = spec;
+    property.typeValidator = validators[spec];
   },
-  label: function(property, value) {
-    property.label = value;
+  label: function(property, spec) {
+    property.label = spec;
+  },
+  message: function(property, spec) {
+    property.message = spec;
   }
 }
 
-function PresenceValidator() {}
+function PresenceValidator(specification, property) {
+  this.message = specification.message ||
+                 (property.label || property.name) + ' is required';
+}
 
 PresenceValidator.prototype.validate = function(value) {
   if (value == null || value == '') {
-    return [{ message: 'is required' }];
+    return [{ message: this.message }];
   }
   return [];
 }
@@ -56,11 +59,13 @@ FormatValidator.prototype.validate = function(value) {
   return [];
 }
 
-function EmailValidator() {}
+function EmailValidator(specification) {
+  this.message = specification.message || 'Invalid email address';
+}
 
 EmailValidator.prototype.validate = function(value) {
   if (value != null && value.indexOf('@') == -1) {
-    return [{ message: 'is not a valid email address' }];
+    return [{ message: this.message }];
   }
   return [];
 }

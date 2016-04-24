@@ -13,13 +13,22 @@ function Property(name, definition) {
 }
 
 Property.prototype.addValidator = function(validator) {
-  this.validators.push(validator)
+  this.validators.push(validator);
 };
 
 Property.prototype.validate = function(value) {
   var errors = [];
-  for (var i = 0; i < this.validators.length; ++i) {
-    errors = errors.concat(this.applyValidator(this.validators[i], value));
+  if (this.presenceValidator) {
+    errors = errors.concat(this.applyValidator(this.presenceValidator, value));
+  }
+  if (errors.length == 0) {
+    if (this.typeValidator) {
+      this.typeValidator(this, { message: this.message });
+      delete(this.typeValidator);
+    }
+    for (var i = 0; i < this.validators.length; ++i) {
+      errors = errors.concat(this.applyValidator(this.validators[i], value));
+    }
   }
   return errors;
 };

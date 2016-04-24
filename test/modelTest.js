@@ -13,14 +13,28 @@ describe('model(schema)', function() {
       properties: {
         firstName: {
           type: 'string',
-          presence: true,
+          presence: {
+            message: 'Please enter a first name'
+          },
           format: {
             pattern: '^[A-Z][A-Za-z\s]+$',
-            message: 'must contain alphabetic characters and start with capital'
+            message: 'First name must only contain letters and start with a capital'
           }
         },
-        lastName: { type: 'string', presence: true, label: 'Surname' },
-        email: { type: 'email', presence: true },
+        lastName: {
+          type: 'string',
+          presence: {
+            message: 'Please enter a last name'
+          },
+          label: 'Surname'
+        },
+        email: {
+          type: 'email',
+          presence: {
+            message: "Please enter an email address"
+          },
+          message: 'Please enter a valid email address'
+        },
         company: { schema: 'Company' },
         photos: { schema: ['Image'] },
         age: { type: 'integer' }
@@ -31,10 +45,12 @@ describe('model(schema)', function() {
       name: 'Company',
       properties: {
         name: {
-          presence: true,
+          presence: {
+            message: 'Please enter a name'
+          },
           format: {
             pattern: /orium$/,
-            message: 'must be an orium!'
+            message: 'must end in "orium"!'
           }
         },
         logo: { schema: 'Image' },
@@ -120,6 +136,15 @@ describe('model(schema)', function() {
         ned.firstName = undefined;
         expect(ned.isValid()).to.be.false;
       });
+    });
+
+    describe('with { presence: { message: "..." } }', function() {
+
+      it('uses the message in the error', function() {
+        ned.email = '';
+        expect(ned.validate().errorsOn('email')).to.eql(["Please enter an email address"]);
+      });
+
     });
 
     describe('with { integer: true }', function() {
@@ -216,7 +241,7 @@ describe('model(schema)', function() {
           moe.email = '123 Fake Street';
           expect(leftorium.validate().errors).to.eql([{
             property: "contacts.1.email",
-            message: "is not a valid email address"
+            message: "Please enter a valid email address"
           }]);
         });
 
@@ -259,11 +284,11 @@ describe('model(schema)', function() {
       ned.company.logo = new Contact({});
       ned.company.contacts = [krusty];
       expect(ned.validate().errors).to.eql([
-        { property: 'firstName', message: 'is required' },
-        { property: 'email', message: 'is not a valid email address' },
-        { property: 'company.name', message: 'is required' },
+        { property: 'firstName', message: 'Please enter a first name' },
+        { property: 'email', message: 'Please enter a valid email address' },
+        { property: 'company.name', message: 'Please enter a name' },
         { property: 'company.logo', message: 'is not a valid Image' },
-        { property: 'company.contacts.0.email', message: 'is required' }
+        { property: 'company.contacts.0.email', message: 'Please enter an email address' }
       ]);
     });
 
@@ -272,7 +297,7 @@ describe('model(schema)', function() {
       it('lists error messages for the firstName property', function() {
         var anon = new Contact();
         var errors = anon.validate().errorsOn('firstName');
-        expect(errors).to.eql(['is required']);
+        expect(errors).to.eql(['Please enter a first name']);
       });
 
     });
@@ -282,7 +307,7 @@ describe('model(schema)', function() {
       it("lists error messages for the related company name property", function() {
         leftorium.name = null;
         var errors = ned.validate().errorsOn('company.name');
-        expect(errors).to.eql(['is required']);
+        expect(errors).to.eql(['Please enter a name']);
       });
 
     });
