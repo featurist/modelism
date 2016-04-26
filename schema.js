@@ -11,7 +11,7 @@ Schema.prototype.validate = function(model) {
   var property = null;
   for (var i = 0; i < this.properties.length; ++i) {
     property = this.properties[i];
-    errors = errors.concat(property.validate(model[property.name]));
+    errors = errors.concat(property.validate(model[property.name], model));
   }
   return new ValidationResult(errors);
 };

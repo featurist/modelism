@@ -1,12 +1,12 @@
 # modelism
 
-A DSL for defining self-validating JavaScript models.
+A schema language for validating JavaScript objects
 
 ## Example
 
-### Defining models
+### Defining validation models
 
-Use compact schema definitions to define validation rules:
+Use compact schema definitions to define model constructors:
 
 ```JavaScript
 var model = require('modelism');
@@ -15,14 +15,25 @@ var Company = model({
   name: 'Company',
   properties: {
     name: {
-      presence: true,
+      presence: {
+        message: 'Name is required'
+      },
       format: {
-        pattern: '^[A-Za-z0-9\s]+$',
-        message: 'Alphanumeric characters'
+        pattern: /^[A-Za-z0-9\s]*$/,
+        message: 'Letters, numbers and whitespace only'
       }
     },
-    email: {
-      email: true
+    registered: {
+      type: 'boolean'
+    },
+    registrationNumber: {
+      type: 'number',
+      presence: {
+        message: 'Registered companies must have registration numbers',
+        enabled: function(company) {
+          return company.registered;
+        }
+      }
     }
   }
 });
@@ -30,7 +41,7 @@ var Company = model({
 
 ### Creating models
 
-Simple models can be instantiated with property values:
+Models can be instantiated with property values:
 
 ```JavaScript
 var leftorium = new Company({
@@ -52,8 +63,8 @@ leftorium.name = '';
 leftorium.isValid()                     // -> false
 
 var validation = leftorium.validate();  // -> { errors: [...] }
-leftorium.errors;                       // -> [{ property: ..., message: ... }, ...]
-leftorium.errorsOn('name')              // -> ['is required']
+validation.errors;                      // -> [{ property: ..., message: ... }, ...]
+validation.errorsOn('name')             // -> ['is required']
 ```
 
 ### Relationships between models

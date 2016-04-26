@@ -55,15 +55,21 @@ describe('model(schema)', function() {
         },
         logo: { schema: 'Image' },
         yearIncorporated: { integer: true },
-        contacts: { schema: ['Contact'] }
+        contacts: { schema: ['Contact'] },
+        registered: { type: 'boolean' },
+        registrationNumber: {
+          type: 'number',
+          presence: {
+            enabled: function(company) { return company.registered; }
+          }
+        }
       }
     });
 
     Image = model({
       name: 'Image',
       properties:{
-        url: {},
-        data: { type: 'file' }
+        url: {}
       }
     });
 
@@ -147,6 +153,37 @@ describe('model(schema)', function() {
 
     });
 
+    describe('with { presence: { enabled: function(model) {} } }', function() {
+      
+      beforeEach(function() {
+        Company = model({
+          name: 'Company',
+          properties: {
+            registered: { type: 'boolean' },
+            registrationNumber: {
+              presence: {
+                enabled: function(company) { return company.registered; }
+              }
+            }
+          }
+        })
+      })
+      
+      it('disables the validation when the model fails the test', function() {
+        var unregistered = new Company();
+        expect(unregistered.isValid()).to.be.true;
+      });
+
+      it('enables the validation when the model passes the test', function() {
+        var registered = new Company({ registered: true });
+        expect(registered.isValid()).to.be.false;
+        registered.registrationNumber = 12938882104;
+        expect(registered.isValid()).to.be.true;
+      });
+
+    });
+
+
     describe('with { integer: true }', function() {
 
       it('is true when the value is empty', function() {
@@ -195,6 +232,38 @@ describe('model(schema)', function() {
       it('is true when the formatted value does match', function() {
         leftorium.name = 'Boriumorium';
         expect(ned.isValid()).to.be.true;
+      });
+
+    });
+
+    describe('with { format: { enabled: function(model) {} } }', function() {
+      
+      beforeEach(function() {
+        Company = model({
+          name: 'Company',
+          properties: {
+            slogan: {
+              type: 'string',
+              format: {
+                pattern: /school/,
+                message: 'Must be cool',
+                enabled: function(company) { return company.cool; }
+              }
+            }
+          }
+        })
+      })
+      
+      it('disables the validation when the model fails the test', function() {
+        var uncool = new Company({ cool: false, slogan: '' });
+        expect(uncool.isValid()).to.be.true;
+      });
+
+      it('enables the validation when the model passes the test', function() {
+        var cool = new Company({ cool: true, slogan: 'universitry' });
+        expect(cool.isValid()).to.be.false;
+        cool.slogan = 'Too school for cool';
+        expect(cool.isValid()).to.be.true;
       });
 
     });
@@ -268,6 +337,34 @@ describe('model(schema)', function() {
 
       it('sets the property type to string', function() {
         expect(new Contact({}).schema.properties[0].type).to.eql('string');
+      });
+
+    });
+
+    describe("with { type: 'boolean' }", function() {
+
+      it('is valid when the value is a boolean', function() {
+        expect(new Company({ registered: true }).validate().errorsOn('registered')).to.eql([]);
+      });
+
+      it('is invalid when the value is a string', function() {
+        expect(new Company({ registered: 'true' }).validate().errorsOn('registered')).to.eql([
+          'Value must be a boolean'
+        ]);
+      });
+
+    });
+
+    describe("with { type: 'number' }", function() {
+
+      it('is valid when the value is a number', function() {
+        expect(new Company({ registrationNumber: 123.456 }).validate().errorsOn('registrationNumber')).to.eql([]);
+      });
+
+      it('is invalid when the value is a string', function() {
+        expect(new Company({ registrationNumber: '654.321' }).validate().errorsOn('registrationNumber')).to.eql([
+          'Value must be a number'
+        ]);
       });
 
     });

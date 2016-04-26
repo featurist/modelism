@@ -11,6 +11,9 @@ var validators = {
   integer: function(property, spec) {
     property.addValidator(new IntegerValidator(spec));
   },
+  number: function(property, spec) {
+    property.addValidator(new NumberValidator(spec));
+  },
   schema: function(property, spec) {
     try {
       property.addValidator(new RelationValidator(property.name, spec));
@@ -20,9 +23,17 @@ var validators = {
       throw new Error(property.name + '.schema is invalid');
     }
   },
+  string: function(property, spec) {
+  },
+  boolean: function(property, spec) {
+    property.addValidator(new BooleanValidator(spec));
+  },
   type: function(property, spec) {
-    property.type = spec;
     property.typeValidator = validators[spec];
+    if (!property.typeValidator) {
+      throw new Error("Property type '" + spec + "' is not supported");
+    }
+    property.type = spec;
   },
   label: function(property, spec) {
     property.label = spec;
@@ -32,7 +43,12 @@ var validators = {
   }
 }
 
+function BaseValidator(validator, spec) {
+  validator.enabled = spec.enabled;
+}
+
 function PresenceValidator(specification, property) {
+  BaseValidator(this, specification);
   this.message = specification.message ||
                  (property.label || property.name) + ' is required';
 }
@@ -45,6 +61,7 @@ PresenceValidator.prototype.validate = function(value) {
 }
 
 function FormatValidator(specification) {
+  BaseValidator(this, specification);
   this.specification = specification;
   this.regexp = new RegExp(this.specification.pattern);
 }
@@ -75,6 +92,24 @@ function IntegerValidator() {}
 IntegerValidator.prototype.validate = function(value) {
   if (value != null && /\D/.test(value.toString())) {
     return [{ message: 'is not an integer' }];
+  }
+  return [];
+}
+
+function BooleanValidator() {}
+
+BooleanValidator.prototype.validate = function(value) {
+  if (value != null && typeof(value) !== 'boolean') {
+    return [{ message: 'Value must be a boolean' }];
+  }
+  return [];
+}
+
+function NumberValidator() {}
+
+NumberValidator.prototype.validate = function(value) {
+  if (value != null && typeof(value) !== 'number') {
+    return [{ message: 'Value must be a number' }];
   }
   return [];
 }
