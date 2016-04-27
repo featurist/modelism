@@ -54,7 +54,7 @@ function PresenceValidator(specification, property) {
 }
 
 PresenceValidator.prototype.validate = function(value) {
-  if (value == null || value == '') {
+  if (value == null || (value == '' && typeof(value) == 'string')) {
     return [{ message: this.message }];
   }
   return [];

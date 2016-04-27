@@ -133,6 +133,19 @@ describe('model(schema)', function() {
         expect(ned.isValid()).to.be.false;
       });
 
+      it('is true when the value is false', function() {
+        var Person = model({
+          name: 'Person',
+          properties: {
+            happy: {
+              type: 'boolean',
+              presence: true
+            }
+          }
+        });
+        expect(new Person({ happy: false }).isValid()).to.be.true;
+      });
+
       it('is false when the property is undefined', function() {
         delete(ned.firstName);
         expect(ned.isValid()).to.be.false;

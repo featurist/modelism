@@ -1,6 +1,6 @@
 {
   "name": "modelism",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A DSL for defining self-validating models",
   "main": "index.js",
   "scripts": {
